@@ -2000,11 +2000,15 @@ cntj (57)`;
 						let childrenNames  = (matched[3])? matched[3].split(',').map(element => element.trim()) : [];
 						let towerPart = new TowerPart(
 							matched[1],
-							matched[2],
+							parseInt(matched[2]),
 							childrenNames
 						)
 						// console.log(towerPart);
 						return towerPart;
+					}
+
+					checkWeights(){
+						this.root.sumChildWeight();
 					}
 				}
 
@@ -2013,6 +2017,7 @@ cntj (57)`;
 						this.name = name;
 						this.parent = null;
 						this.weight = weight;
+						this.childrenSumWeight = null;
 						this.childrenNames = childrenNames;
 						this.children = [];
 						this.leaf = this.childrenNames.length == 0;
@@ -2022,12 +2027,37 @@ cntj (57)`;
 						child.parent = this;
 						this.children.push(child);
 					}
+
+					sumChildWeight(){
+						if(!this.leaf){
+							this.children.forEach((child)=>child.sumChildWeight());
+						}
+
+						if(this.leaf){
+							this.childrenSumWeight = this.weight;
+						}else{
+							let firstWeight = this.children[0].childrenSumWeight;
+							this.children.forEach(child=>{
+								if(child.childrenSumWeight != firstWeight){
+									this.alertAnomaly(child.childrenSumWeight - firstWeight, child.weight - (child.childrenSumWeight - firstWeight));
+								}
+							})
+							let childrenWeight = this.children.reduce((prev, current)=>prev+current.childrenSumWeight,0);
+							this.childrenSumWeight = childrenWeight + this.weight;
+						}
+					}
+
+					alertAnomaly(diff, newWeight){
+						console.log('anomaly:',this, diff, newWeight);
+					}
 				}
 
-				var tt = new Tower(day7inputTest);
-				console.log(tt.root);
+				/* var tt = new Tower(day7inputTest);
+				tt.checkWeights();
+				console.log(tt.root); */
 				var t = new Tower(day7input);
 				console.log(t.root);
+				t.checkWeights();
 
 		</script>
 	</body>
