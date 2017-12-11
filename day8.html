@@ -1013,7 +1013,21 @@ c inc -20 if c == 10`;
 						this.instructionData = instructionData;
 						this.instructions = [];
 						this.registers = new Map();
-						this.buildInstructionList;
+						this.buildInstructionList();
+						this.max = 0;
+					}
+
+					findMaxAfterExecute(){
+						this.executes();
+						return this.findMax();
+					}
+
+					saveAsMaxIfHiger(value){
+						this.max = value > this.max ? value : this.max;
+					}
+
+					findMax(){
+						return [...this.registers.values()].reduce((max, current)=>current>max?current:max, 0);
 					}
 
 					buildInstructionList(){
@@ -1024,7 +1038,7 @@ c inc -20 if c == 10`;
 
 					executes(){
 						this.instructions
-							.forEach(this.executeInstruction);
+							.forEach(this.executeInstruction, this);
 					}
 
 					executeInstruction(instruction){
@@ -1034,12 +1048,43 @@ c inc -20 if c == 10`;
 					}
 
 					executeOperation(instruction){
+						let registryValue = this.getRegisterValue(instruction.register);
+						let newValue;
+						switch(instruction.instruction){
+							case 'inc':
+								newValue = registryValue + instruction.argument;
+								break;
+							case 'dec':
+								newValue = registryValue - instruction.argument;
+								break;
+						}
+						this.setRegisterValue(instruction.register, newValue);
+					}
 
+					getRegisterValue(registry){
+						return this.registers.has(registry) ? this.registers.get(registry) : 0;
+					}
+					setRegisterValue(registry, value){
+						this.saveAsMaxIfHiger(value);
+						this.registers.set(registry, value);
 					}
 
 					checkCondition(instruction){
-						let registerValue = this.registers.has(instruction.conditionRegister) ? this.registers.get(instruction.conditionRegister) : 0;
-
+						let registerValue = this.getRegisterValue(instruction.conditionRegister);
+						switch(instruction.conditionType){
+							case '<':
+								return registerValue < instruction.conditionArgument;
+							case '<=':
+								return registerValue <= instruction.conditionArgument;
+							case '>':
+								return registerValue > instruction.conditionArgument;
+							case '>=':
+								return registerValue >= instruction.conditionArgument;
+							case '==':
+								return registerValue == instruction.conditionArgument;
+							case '!=':
+								return registerValue != instruction.conditionArgument;
+						}
 					}
 
 
@@ -1050,13 +1095,10 @@ c inc -20 if c == 10`;
 							tokens[0],
 							tokens[1],
 							parseInt(tokens[2]),
-							tokens[3],
 							tokens[4],
-							parseInt(tokens[5])
+							tokens[5],
+							parseInt(tokens[6])
 						)
-						//y inc 497 if n <= 3
-
-						// console.log(towerPart);
 						return instruction;
 					}
 
@@ -1081,7 +1123,11 @@ c inc -20 if c == 10`;
 				}
 
 				var it = new Insturctions(day8inputTest);
+				console.log(it.findMaxAfterExecute());
+				console.log(it.max);
 				var i = new Insturctions(day8input);
+				console.log(i.findMaxAfterExecute());
+				console.log(i.max);
 				
 
 		</script>
