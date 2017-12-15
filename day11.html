@@ -15,6 +15,14 @@
 					y:0,
 					z:0
 				}
+				this.distances = [];
+			}
+
+			maxDistance(){
+				return Math.max(...this.distances);
+			}
+			addDistance(){
+				this.distances.push(this.distance());
 			}
 
 			distance(){
@@ -55,7 +63,10 @@
 			}
 
 			executeInstructions(){
-				this.instructions.forEach(this.move, this);
+				this.instructions.forEach(instruction=>{
+					this.move(instruction);
+					this.addDistance();
+				}, this);
 			}
 			
 
@@ -65,9 +76,11 @@
 		var hexGridTest = new HexGrid(day11inputTest);
 		hexGridTest.executeInstructions();
 		console.log(hexGridTest.distance());
+		console.log(hexGridTest.maxDistance());
 		var hexGrid = new HexGrid(day11input);
 		hexGrid.executeInstructions();
 		console.log(hexGrid.distance());
+		console.log(hexGrid.maxDistance());
 
 
 	</script>
