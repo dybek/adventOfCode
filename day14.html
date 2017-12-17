@@ -1,0 +1,131 @@
+<html>
+
+<body>
+	<script>
+
+		class Hashes {
+			constructor(
+				inputString,
+				listSize
+			) {
+				this.lengths = this.createLengths(inputString);
+				this.list = new CircularArray(this.createIncrementalList(listSize));
+				this.current = 0;
+				this.hash = null;
+				this.skipSize = 0;
+			}
+
+			createLengths(inputString){
+				return [...inputString].map((str) => str.charCodeAt(0)).concat([17, 31, 73, 47, 23]);
+			}
+
+			createIncrementalList(listSize){
+				let list = [];
+				for(let i=0;i<listSize;i++) list.push(i);
+				return list;
+			}
+
+			calculate(){
+				for(let i=0;i<64;i++) this.calculateOneRound();
+				this.hash = this.splitArray()
+					.map(this.xorFragment)
+					.map((num)=>Number(num).toString(16))
+					.map((hex)=>{
+						return hex.padStart(2,'0');
+					})
+					.join('');
+			}
+
+			splitArray(){
+				let splitedArray = [];
+				for(let i=0;i<256;i+=16){
+					splitedArray.push(this.list.getFragment(i, 16));
+				}
+				return splitedArray;
+			}
+
+			xorFragment(fragment){
+				return fragment.reduce((xor, current) => xor ^ current, 0);
+			}
+
+			calculateOneRound(){
+				this.lengths.forEach(length => {
+					let fragment = this.list.getFragment(this.current, length);
+					this.list.setFragment(this.current, fragment.reverse());
+					this.current += (length + this.skipSize);
+					this.skipSize++;
+				}, this);
+				this.product = this.list.array[0] * this.list.array[1];
+			}
+
+		}
+
+		class CircularArray{
+			constructor(array){
+				this.array = array;
+			}
+			getFragment(start, length){
+				let fragment = [];
+				let listIterator = 0;
+				for(let i = 0;i<length;i++){
+					listIterator = (i + start) % this.array.length;
+					fragment.push(this.array[listIterator]);
+				}
+				return fragment;
+			}
+			setFragment(start, fragment){
+				let listIterator = 0;
+				for (let i = 0; i < fragment.length; i++) {
+					listIterator = (i + start) % this.array.length;
+					this.array[listIterator] = fragment[i];
+				}
+			}
+		}
+
+		let day14input = "amgozmfv";
+		let day14inputTest = "flqrgnkx";
+
+		function createArray(input){
+			let array = [];
+			for(let i=1;i<=127;i++){
+				let row = input + '-' + i;
+				let hash = new Hashes(row, 256);
+				hash.calculate();
+				// console.log(hash.hash)
+				// console.log(hash.hash.length);
+				array.push(hash.hash.padStart(32,'0'));
+			}
+			// console.log(array);
+			return array;
+		}
+
+		function calculateSquares(input){
+			return createArray(input)
+				.map(hexToBinary)
+				.map(count1)
+				.reduce((sum, count1)=>sum+=count1,0)
+
+		}
+
+		function hexToBinary(hex){
+			let bin = '';
+			for(let i=0;i<hex.length;i++){
+				bin += parseInt(hex[i],16).toString(2).padStart(4,'0');
+			}
+			console.log(bin);
+			return bin;
+		}
+
+		function count1(binary){
+			return [...binary].reduce((sum,current)=>sum+=(current == '1'?1:0),0);
+		}
+
+		console.log(calculateSquares(day14inputTest));
+		// console.log(calculateSquares(day14input));
+
+
+
+	</script>
+</body>
+
+</html>
