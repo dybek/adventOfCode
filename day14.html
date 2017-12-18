@@ -85,45 +85,107 @@
 		let day14input = "amgozmfv";
 		let day14inputTest = "flqrgnkx";
 
-		function createArray(input){
-			let array = [];
-			for(let i=1;i<=127;i++){
-				let row = input + '-' + i;
-				let hash = new Hashes(row, 256);
-				hash.calculate();
-				// console.log(hash.hash)
-				// console.log(hash.hash.length);
-				array.push(hash.hash.padStart(32,'0'));
+		class Defragmentation{
+			constructor(inputString){
+				this.inputString = inputString;
 			}
-			// console.log(array);
-			return array;
-		}
 
-		function calculateSquares(input){
-			return createArray(input)
-				.map(hexToBinary)
-				.map(count1)
-				.reduce((sum, count1)=>sum+=count1,0)
-
-		}
-
-		function hexToBinary(hex){
-			let bin = '';
-			for(let i=0;i<hex.length;i++){
-				bin += parseInt(hex[i],16).toString(2).padStart(4,'0');
+			createArray(input){
+				let array = [];
+				for(let i=0;i<=127;i++){
+					let row = input + '-' + i;
+					let hash = new Hashes(row, 256);
+					hash.calculate();
+					array.push(hash.hash.padStart(32,'0'));
+				}
+				return array;
 			}
-			console.log(bin);
-			return bin;
+
+			calculateSquares(){
+				return this.createArray(this.inputString)
+					.map(this.hexToBinary)
+					.map(this.count1)
+					.reduce((sum, count1)=>sum+=count1,0)
+
+			}
+
+			hexToBinary(hex){
+				let bin = '';
+				for(let i=0;i<hex.length;i++){
+					bin += parseInt(hex[i],16).toString(2).padStart(4,'0');
+				}
+				return bin;
+			}
+
+			count1(binary){
+				return [...binary].reduce((sum,current)=>sum+=(current == '1'?1:0),0);
+			}
+			
+			calculateRegions(){
+				let areaArray = this.createArray(this.inputString)
+					.map(this.hexToBinary)
+					.map(
+						(binaryString) => [...binaryString].map(bit=>new Cell(bit))
+					);
+				let area = new Area(areaArray);
+				return area.calculateRegions();
+			}
 		}
 
-		function count1(binary){
-			return [...binary].reduce((sum,current)=>sum+=(current == '1'?1:0),0);
+		class Area{
+			constructor(areaArray){
+				this.areaArray = areaArray;
+				this.max = areaArray.length;
+				this.currentRegion = 1;
+			}
+			calculateRegions(){
+				for(let i=0;i<this.max;i++){
+					for (let j = 0; j < this.max; j++) {
+						if(this.areaArray[i][j].visited) continue;
+						if(this.visitCell(i,j)){
+							this.currentRegion++;
+						}
+					}	
+				}
+				return --this.currentRegion;
+			}
+			visitCell(x,y, regionNumber){
+				let cell = this.areaArray[x][y];
+				if(cell.visited) return false;
+				let isRegion = !cell.visited && cell.value == '1';
+				cell.visited = true;
+				cell.region = this.currentRegion;
+				if(isRegion){
+					let x1 = x-1;
+					let x2 = x+1;
+					let y1 = y-1;
+					let y2 = y+1;
+					if(x1>=0) this.visitCell(x1,y);
+					if(x2<this.max) this.visitCell(x2,y);
+					if(y1>=0) this.visitCell(x,y1);
+					if(y2<this.max) this.visitCell(x,y2);
+					return true;
+				}else{
+					return false;
+				}
+
+			}
 		}
 
-		console.log(calculateSquares(day14inputTest));
-		// console.log(calculateSquares(day14input));
+		class Cell{
+			constructor(value){
+				this.value = value;
+				this.visited = false;
+				this.region = null;
+			}
+		}
 
-
+		var dt = new Defragmentation(day14inputTest);
+		console.log(dt.calculateSquares());
+		console.log(dt.calculateRegions());
+		var d = new Defragmentation(day14input);
+		console.log(d.calculateSquares());
+		console.log(d.calculateRegions());
 
 	</script>
 </body>
