@@ -13,6 +13,7 @@
 				this.movesStrings = movesData.split(',');
 				this.moves = this.extractMoves();
 				this.dancers = this.createDancers(dancersCount);
+				this.history = [];
 				this.executeOneBilion();
 			}
 
@@ -26,8 +27,12 @@
 			}
 			executeOneBilion(){
 				for(let i=0;i< 1000000000;i++){//1000000000
+					let dancers = this.dancers.join('');
+					if(this.history.indexOf(dancers)>=0) break;
+					this.history.push(dancers);
 					this.executeMoves();
 				}
+				console.log(this.history[(1000000000 % this.history.length)]);
 			}
 
 			executeMoves() {
@@ -60,7 +65,7 @@
 				let spinPosition = matched[1];
 				return {
 					fn: this.executeSpin,
-					args: [spinPosition]
+					args: [parseInt(spinPosition)]
 				}
 			}
 			executeExchange(first, second) {
@@ -74,7 +79,7 @@
 				let second = matched[2];
 				return {
 					fn: this.executeExchange,
-					args: [first, second]
+					args: [parseInt(first), parseInt(second)]
 				}
 			}
 
@@ -100,9 +105,7 @@
 
 
 		var dt = new Dance(day16inputTest, 5);
-		console.log(dt.dancers.join(''));
 		var d = new Dance(day16input, 16);
-		console.log(d.dancers.join(''));
 
 
 	</script>
