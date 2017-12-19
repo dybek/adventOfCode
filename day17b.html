@@ -1,0 +1,86 @@
+<html>
+
+<body>
+	<script>
+		class TwoWayList{
+			constructor(){
+				this.head = null;
+				this.current = null;
+			}
+			add(value){
+				let element = new ListElement(value);
+				if(!this.head){
+					this.head = element;
+					this.current = element;
+					this.current.next = element;
+					this.current.prev = element;
+				}else{
+					let next = this.current.next;
+					this.current.next = element;
+					element.prev = this.current;
+					element.next = next;
+				}
+			}
+			next(count){
+				count = count || 1;
+				for(let i=0;i<count;i++){
+					this.current = this.current.next;
+				}
+			}
+			toString(){
+				let values = [];
+				values.push(this.head);
+				let next = this.head.next;
+				while(next != this.head){
+					values.push(next);
+					next = next.next;
+				}
+				return values.toString();
+			}
+		}
+
+		class ListElement{
+			constructor(value){
+				this.value = value;
+				this.prev = null;
+				this.next = null;
+			}
+			toString(){
+				return this.value.toString();
+			}
+		}
+
+		
+
+		class Spinlock {
+			constructor(input){
+				this.input = input;
+				this.buffer = new TwoWayList();
+				this.buffer.add(0);
+				this.zero = this.buffer.current;
+			}
+
+			insertValuesToList(maxValue){
+				for(let i=1;i<=maxValue;i++){
+					this.buffer.next(this.input);
+					this.buffer.add(i);
+					this.buffer.next(1);
+				}
+			}
+			partB(){
+				                    //50000000
+				this.insertValuesToList(50000000);		//50000000		
+				console.log(this.zero.next.value);
+			}
+
+		}
+
+/* 		let spinlockTest = new Spinlock(3);
+		spinlockTest.partB(); */
+		let spinlock = new Spinlock(366);
+		spinlock.partB();
+
+
+	</script>
+</body>
+</html>
