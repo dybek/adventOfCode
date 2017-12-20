@@ -1,0 +1,139 @@
+<html>
+
+<body>
+	<script>
+
+		let day18inputTest = `set a 1
+add a 2
+mul a a
+mod a 5
+snd a
+set a 0
+rcv a
+jgz a -1
+set a 1
+jgz a -2`;
+		let day18input = `set i 31
+set a 1
+mul p 17
+jgz p p
+mul a 2
+add i -1
+jgz i -2
+add a -1
+set i 127
+set p 952
+mul p 8505
+mod p a
+mul p 129749
+add p 12345
+mod p a
+set b p
+mod b 10000
+snd b
+add i -1
+jgz i -9
+jgz a 3
+rcv b
+jgz b -1
+set f 0
+set i 126
+rcv a
+rcv b
+set p a
+mul p -1
+add p b
+jgz p 4
+snd a
+set a b
+jgz 1 3
+snd b
+set f 1
+add i -1
+jgz i -11
+snd a
+jgz f -16
+jgz a -19`;
+
+		class Duet{
+			constructor(programData){
+				// debugger;
+				this.programData = programData;
+				this.instructions = this.extractInsturctions();
+				this.registers = new Map();
+				this.ip = 0;
+				this.lastSound = 0;
+			}
+
+			extractInsturctions(){
+				return this.programData
+					.split('\n')
+					.map(instruction=>instruction.split(/\s/));
+			}
+			executeInstructions(){
+				wl:
+				while(this.ip<this.instructions.length){
+					let instruction = this.instructions[this.ip];
+					let jump = false;
+					switch (instruction[0]) {
+						case 'snd':
+							this.lastSound = this.getValue(instruction[1]);
+							break;
+						case 'set':
+							this.registers.set(instruction[1], this.getValue(instruction[2]));
+							break;
+						case 'add':
+							let sum = this.getValue(instruction[1]) + this.getValue(instruction[2]);
+							this.registers.set(instruction[1], sum);
+							break;
+						case 'mul':
+							let multiply = this.getValue(instruction[1]) * this.getValue(instruction[2]);
+							this.registers.set(instruction[1], multiply);
+							break;
+						case 'mod':
+							let remainder = this.getValue(instruction[1]) % this.getValue(instruction[2]);
+							this.registers.set(instruction[1], remainder);
+							break;
+						case 'rcv':
+							if (this.getValue(instruction[1]) !== 0) {
+								console.log('rcv:', this.lastSound);
+								break wl;
+							}
+							break;
+						case 'jgz':
+							if (this.getValue(instruction[1]) > 0) {
+								this.ip += this.getValue(instruction[2]);
+								jump = true;
+							}
+							break;
+					}
+					if(!jump){
+						this.ip++;
+					}
+				}
+			}
+			
+			getValue(instructionParam){
+				let value = parseInt(instructionParam);
+				if(Number.isNaN(value)){
+					value = this.registers.has(instructionParam)?this.registers.get(instructionParam):0;
+				}
+				return value;
+			}
+
+			partA(){
+				this.executeInstructions();
+			}
+			
+		}
+
+		let duetTest = new Duet(day18inputTest);
+		duetTest.partA();
+		let duet = new Duet(day18input);
+		duet.partA();
+
+
+
+	</script>
+</body>
+</html>
