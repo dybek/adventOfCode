@@ -6,7 +6,31 @@
 		let day22inputTest = `..#
 #..
 ...`;
-		let day22input = ``;
+		let day22input = `#..###...#..#.#.#...#..##
+....#.##..#..###...###...
+##.#.....###...#.##...###
+##...#.####..#####..####.
+##.#...#.##...##.....##.#
+###.#.#...###..###.###...
+#.#..#.#.###..#.##.#..###
+.#..###.##..##.#....#.#..
+#.#.......###.##...#.##..
+#.#.######.##.#..#...#...
+######.#.##...#.#...###.#
+.#....#.###.##.######....
+#.#####.#####.#.#..##.###
+..##.#.#...###......###.#
+.##.##..##.#.#.#######.##
+#..###.###....#.....##..#
+..##..####..##.#...####..
+.##.####.##.##..##..#....
+###...#.#..##...#.#..##..
+......##.....#.#..#.#.###
+#.#.##.##.#####....#.#..#
+.....#.###.##...#...#..#.
+#...#......##.##.#####.##
+#.##.##.......#.##....#.#
+####.##.#.#........###.##`;
 
 		class Virus{
 			constructor(nodeMapString){
@@ -77,13 +101,19 @@
 			}
 
 			nextBurst(){
-				if(this.getCurrentValue() == '#'){
-					this.turnRight();
-					this.setCurrentValue('.');
-				}else{
+				if(this.getCurrentValue() == '.'){
 					this.turnLeft();
+					this.setCurrentValue('W');
+				}else if (this.getCurrentValue() == 'W') {
 					this.setCurrentValue('#');
 					this.infected++;
+				} else if (this.getCurrentValue() == '#') {
+					this.turnRight();
+					this.setCurrentValue('F');
+				} else if (this.getCurrentValue() == 'F') {
+					this.turnLeft();
+					this.turnLeft();
+					this.setCurrentValue('.');
 				}
 				this.moveOneStep();
 			}
@@ -121,24 +151,22 @@
 				console.log(text);
 			}
 
-			partA(){
-				this.bursts(10000);
+			partB(){
+				this.bursts(10000000);
 				console.log(this.infected);
 			}
 		}
 
-		let virusTest = new Virus(day22inputTest);
-		virusTest.bursts(7);
-		console.log(virusTest.infected);//5
+		// let virusTest = new Virus(day22inputTest);
+		// virusTest.bursts(100);
+		// console.log(virusTest.infected);//26
+		
 		// let virusTest2 = new Virus(day22inputTest);
-		// virusTest2.bursts(70);
-		// console.log(virusTest2.infected);//41
-		// let virusTest3 = new Virus(day22inputTest);
-		// virusTest3.bursts(10000);
-		// console.log(virusTest3.infected);//5587
+		// virusTest2.bursts(10000000);
+		// console.log(virusTest2.infected);//2511944
 		
 		let virus = new Virus(day22input);
-		virus.partA();
+		virus.partB();
 
 
 	</script>
