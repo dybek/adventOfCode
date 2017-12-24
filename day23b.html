@@ -1,0 +1,117 @@
+<html>
+
+<body>
+	<script>
+
+		let day23inputTest = `set a 1
+mul a a
+set a 0`;
+		let day23input = `set b 81
+set c b
+jnz a 2
+jnz 1 5
+mul b 100
+sub b -100000
+set c b
+sub c -17000
+set f 1
+set d 2
+set e 2
+set g d
+mul g e
+sub g b
+jnz g 2
+set f 0
+sub e -1
+set g e
+sub g b
+jnz g -8
+sub d -1
+set g d
+sub g b
+jnz g -13
+jnz f 2
+sub h -1
+set g b
+sub g c
+jnz g 2
+jnz 1 3
+sub b -17
+jnz 1 -23`;
+
+		class Coprocessor{
+			constructor(programData){
+				// debugger;
+				this.programData = programData;
+				this.instructions = this.extractInsturctions();
+				this.registers = new Map();
+				this.ip = 0;
+				this.mulCount = 0;
+			}
+
+			extractInsturctions(){
+				return this.programData
+					.split('\n')
+					.map(instruction=>instruction.split(/\s/));
+			}
+			executeInstructions(){
+				wl:
+				while(this.ip<this.instructions.length){
+					let instruction = this.instructions[this.ip];
+					let jump = false;
+					switch (instruction[0]) {
+						case 'sub':
+							let sub = this.getValue(instruction[1]) - this.getValue(instruction[2]);
+							this.registers.set(instruction[1], sub);
+							break;
+						case 'set':
+							this.registers.set(instruction[1], this.getValue(instruction[2]));
+							break;
+						case 'add':
+							let sum = this.getValue(instruction[1]) + this.getValue(instruction[2]);
+							this.registers.set(instruction[1], sum);
+							break;
+						case 'mul':
+							let multiply = this.getValue(instruction[1]) * this.getValue(instruction[2]);
+							this.registers.set(instruction[1], multiply);
+							this.mulCount++;
+							break;
+						case 'jnz':
+							if (this.getValue(instruction[1]) != 0) {
+								this.ip += this.getValue(instruction[2]);
+								jump = true;
+							}
+							break;
+					}
+					if(!jump){
+						this.ip++;
+					}
+				}
+			}
+			
+			getValue(instructionParam){
+				let value = parseInt(instructionParam);
+				if(Number.isNaN(value)){
+					value = this.registers.has(instructionParam)?this.registers.get(instructionParam):0;
+				}
+				return value;
+			}
+
+			partB(){
+				this.registers.set('a', 1);
+				this.executeInstructions();
+				console.log(this.getValue('h'));
+			}
+			
+		}
+
+		let coprocessorTest = new Coprocessor(day23inputTest);
+		coprocessorTest.partB();
+		let coprocessor = new Coprocessor(day23input);
+		coprocessor.partB();
+
+
+
+	</script>
+</body>
+</html>
