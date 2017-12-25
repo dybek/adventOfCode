@@ -44,6 +44,7 @@ jnz 1 -23`;
 				// debugger;
 				this.programData = programData;
 				this.instructions = this.extractInsturctions();
+				// this.registers = new Map([['a', 1], ['b', 108100], ['c', 125100], ['d', 2], ['e', 108099], ['f', 0], ['g', 0], ['h', 0]]);
 				this.registers = new Map();
 				this.ip = 0;
 				this.mulCount = 0;
@@ -55,9 +56,11 @@ jnz 1 -23`;
 					.map(instruction=>instruction.split(/\s/));
 			}
 			executeInstructions(){
+				let i = 0;
 				wl:
-				while(this.ip<this.instructions.length){
+				while(this.ip<this.instructions.length ){ //&& i++ < 10000000
 					let instruction = this.instructions[this.ip];
+					// console.log(instruction);
 					let jump = false;
 					switch (instruction[0]) {
 						case 'sub':
@@ -86,7 +89,9 @@ jnz 1 -23`;
 					if(!jump){
 						this.ip++;
 					}
+
 				}
+					this.printRegistesters();
 			}
 			
 			getValue(instructionParam){
@@ -95,6 +100,10 @@ jnz 1 -23`;
 					value = this.registers.has(instructionParam)?this.registers.get(instructionParam):0;
 				}
 				return value;
+			}
+			printRegistesters(){
+				let regs = ['a','b','c','d','e','f','g','h'].map(registerName=>[registerName, this.getValue(registerName).toString()]);
+				console.table(regs);
 			}
 
 			partB(){
@@ -105,12 +114,59 @@ jnz 1 -23`;
 			
 		}
 
-		let coprocessorTest = new Coprocessor(day23inputTest);
-		coprocessorTest.partB();
-		let coprocessor = new Coprocessor(day23input);
-		coprocessor.partB();
+		// let coprocessorTest = new Coprocessor(day23inputTest);
+		// coprocessorTest.partB();
+		// let coprocessor = new Coprocessor(day23input);
+		// coprocessor.partB();
 
+		function partB(){
+			let a=0,b=0,c=0,d=0,e=0,f=0,g=0,h=0;
+			a=1;
+			b=81;
+			c=b;
+			if(a!=0){
+				b=b*100;
+				b=b+100000;
+				c=b;
+				c=c+17000;
+			}
+			do{
+				f=1;
+				d=2;
+				do{
+					e=2;
+					let eee = b/d;
+					if(Number.isInteger(eee) && eee < b){
+						f = 0;
+					}
+					/* do{
+						if(d * e == b){
+							f=0;
+						}
+						e++;
+				
+					}while( (e - b) != 0); */
+					
+					d++;
+					g=d;
+					g=g-b;
+				}while (g!=0);
+				if(f==0){
+					h++;
+				}
+				g=b;
+				g=g-c;
+				if(g==0){
+					return {
+						a,b,c,d,e,f,g,h
+					};
+				}
+				b=b+17;
+			}while(true);
+		}
+		console.log(partB());
 
+		//1001 to high
 
 	</script>
 </body>
