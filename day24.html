@@ -1,0 +1,188 @@
+<html>
+
+<body>
+	<script>
+		day24inputTest = `0/2
+2/2
+2/3
+3/4
+3/5
+0/1
+10/1
+9/10`;
+		day24input = `25/13
+4/43
+42/42
+39/40
+17/18
+30/7
+12/12
+32/28
+9/28
+1/1
+16/7
+47/43
+34/16
+39/36
+6/4
+3/2
+10/49
+46/50
+18/25
+2/23
+3/21
+5/24
+46/26
+50/19
+26/41
+1/50
+47/41
+39/50
+12/14
+11/19
+28/2
+38/47
+5/5
+38/34
+39/39
+17/34
+42/16
+32/23
+13/21
+28/6
+6/20
+1/30
+44/21
+11/28
+14/17
+33/33
+17/43
+31/13
+11/21
+31/39
+0/9
+13/50
+10/14
+16/10
+3/24
+7/0
+50/50`;
+		class ElectromagneticMoat{
+			constructor(partsData){
+				this.readParts(partsData);
+				this.chains = [];
+				this.findAllBridges();
+			}
+			readParts(partsData){
+				this.parts = partsData
+					.split('\n')
+					.map(row=>row.split('/'))
+					.map(conectors => {
+						let [conector1, conector2] = conectors;
+						return new BridgePart(parseInt(conector1), parseInt(conector2));
+					});
+			}
+			findAllBridges(){
+				this.findNextPart(0,[],this.parts);
+			}
+			findNextPart(serchingPort, currentChain, restOfParts){
+				// console.log(serchingPort, currentChain, restOfParts);
+				// debugger;
+				let nextParts = restOfParts.filter(part=>part.conector1 == serchingPort || part.conector2 == serchingPort);
+				if(nextParts.length == 0){
+					this.chains.push(currentChain);
+				}else if(nextParts.length == 1){
+					currentChain.push(nextParts[0])
+					this.findNextPart(
+						nextParts[0].getOtherConnector(serchingPort),
+						currentChain,
+						this.copyWithout(restOfParts, nextParts[0])
+					)
+				}else{
+					nextParts.forEach(part => {
+						let chain = Array.from(currentChain);
+						chain.push(part)
+						this.findNextPart(
+							part.getOtherConnector(serchingPort),
+							chain,
+							this.copyWithout(restOfParts, part)
+						)
+					});
+				}
+			}
+			copyWithout(array, element){
+				let index = array.indexOf(element);
+				let newArray = [...array];
+				newArray.splice(index, 1);
+				return newArray;
+			}
+
+			partA(){
+				
+				let maxStrength = this.chains.map(chain=>
+					chain
+						.map(chain=>chain.getStrength())
+						.reduce((sum, value)=>sum+value, 0)
+				).reduce((max, value) => value > max ? value : max, 0);
+				console.log(maxStrength);
+			}
+			partB() {
+				let maxStrength = this.chains.map(chain =>
+					chain
+						.map(chain => chain.getStrength())
+						.reduce(
+							(acc, value) => {
+								return {
+									sum: acc.sum + value,
+									length: acc.length + 1
+								}
+							},
+							{sum:0, length:0}
+						)
+				).reduce(
+					(acc, value) => {
+						if(value.length > acc.length){
+							return value;
+						}else if(value.length == acc.length){
+							return (value.sum > acc.sum) ? value : acc;
+						}else{
+							return acc;
+						}
+					},
+					{ sum: 0, length: 0 }
+				);
+				console.log(maxStrength);
+			}
+
+		}
+/* 
+		function(currentChain, restOfParts){
+
+		} */
+
+		class BridgePart{
+			constructor(conector1, conector2){
+				this.conector1 = conector1;
+				this.conector2 = conector2;
+			}
+			getStrength(){
+				return this.conector1 + this.conector2;
+			}
+			getOtherConnector(conector){
+				if(this.conector1 == conector){
+					return this.conector2;
+				}else{
+					return this.conector1;
+				}
+			}
+		}
+
+		let electromagneticMoatTest = new ElectromagneticMoat(day24inputTest);
+		electromagneticMoatTest.partA();
+		electromagneticMoatTest.partB();
+		let electromagneticMoat = new ElectromagneticMoat(day24input);
+		electromagneticMoat.partA();
+		electromagneticMoat.partB();
+	</script>
+</body>
+</html>
