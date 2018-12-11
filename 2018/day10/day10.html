@@ -1,0 +1,105 @@
+<html>
+	<head>
+		<script src="data2.js"></script>
+		<script src="data.js"></script>
+	</head>
+	<body>
+		<canvas id="board" style="width:90vmin;"></canvas>
+		<button onclick="next()">next</button>
+				<script>
+					class InputRow {
+
+						constructor(row) {
+							let matched = /position=<\s*(-?\d*),\s*(-?\d*)> velocity=<\s*(-?\d*),\s*(-?\d*)>/g.exec(row);
+							this.x = parseInt(matched[1]);
+							this.y = parseInt(matched[2]);
+							this.deltaX = parseInt(matched[3]);
+							this.deltaY = parseInt(matched[4]);
+						}
+					}
+
+					class Day {
+						constructor(dayInput) {
+							this.image = dayInput;
+
+							this.canvas = document.getElementById('board');
+							this.board = this.canvas.getContext('2d');
+							this.board.fillStyle = 'rgb(255,0,0)';
+							this.board.clearRect(0, 0, 40, 40);
+						}
+
+						next() {
+							this.image.forEach(element => {
+								element.x += element.deltaX;
+								element.y += element.deltaY;
+							});
+							this.draw();
+						}
+
+						draw() {
+							let minX = Math.min(...this.image
+							.map((element) => element.x));
+							let minY = Math.min(...this.image
+							.map((element) => element.y));
+							let maxX = Math.max(...this.image
+							.map((element) => element.x));
+							let maxY = Math.max(...this.image
+							.map((element) => element.y));
+							//console.log(minX, maxX, minY, maxY);
+
+							this.board.setTransform(1, 0, 0, 1, 0, 0);
+							this.board.clearRect(0, 0, Math.abs(this.minX)+ Math.abs(this.maxX), Math.abs(this.minY) + Math.abs(this.maxY));
+							this.board.fillStyle = 'rgb(255,0,0)';
+
+							this.canvas.width = Math.abs(minX) + Math.abs(maxX);
+							this.canvas.height = Math.abs(minY) + Math.abs(maxY);
+								
+							this.minX = minX;
+							this.minY = minY;
+							this.maxX = maxX;
+							this.maxY = maxY;
+							
+							
+							// this.board.translate((maxX-minX)/2, (maxY - minY) / 2);
+								
+/* 								this.board.fillRect(minX, minY, 1, 1);
+								this.board.fillRect((maxX - minX) / 2, (maxY - minY) / 2, 1, 1);
+								this.board.fillRect(maxX, maxY, 1, 1);
+								this.board.fillRect(minX, maxY, 1, 1);
+								this.board.fillRect(maxX, minY, 1, 1); */
+
+
+							this.image.forEach(element => {
+								this.board.fillRect(element.x, element.y, 1, 1);
+							});
+						}
+
+					};
+
+
+					function input(data) {
+						return data
+							.split('\n')
+							.map(row => new InputRow(row));
+					}
+					function day(data) {
+						return new Day(input(data));
+					}
+
+					// var day = day(data2);
+					var day = day(data);
+					
+					day.draw();
+					let j =0;
+					do{
+						day.next();//131 192 184 193
+						console.log(++j);//10612
+					}while(Math.abs(day.maxY - day.minY) > 20);
+					
+					function next() {
+						console.log(++j);
+						day.next();
+					}
+				</script>
+	</body>
+</html>
