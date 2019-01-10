@@ -121,11 +121,20 @@ class Day {
                 if (matrix[i][j] > 1) count++;
             }
         } */
-        this.printMatrix();
+        // this.printMatrix();
 
-        let start = {y:0,x:500};
+        let start = {y:minY,x:500};
+
+        this.waterCount = 0;
+    
+        // this.go(start.y, start.x);
+        this.goDown(start.y, start.x);
         
-        let point = start;
+        // this.printMatrix();
+        this.writeMatrix(this.matrix)
+
+
+        /* let point = start;
         this.matrix[point.y][point.x] = {type:'water'};
         this.matrix[point.y][point.x].before = null;
         let last = this.matrix[point.y][point.x];
@@ -140,27 +149,191 @@ class Day {
         } else if (this.matrix[point.y - 1][point.x].type == '#') {
             //try go left
             //try go right
-        }
+        } */
 
-        let roads = [];
-        roads.push(new Road(0,500,down))
-        while(roads.length > 0){
-            for(let road of roads){
-                //make a move
-                    //go down if possible
-                    
-                    //go left and right, or check if can be filled
-
-                    //back to before step
-            }
-        }
-
-        let count = 0;
-        return count;
+        return this.waterCount;
     }
 
-    go(y,x,last){
-        
+    goDown(y,x){
+        this.matrix[y][x] = '|';
+        this.waterCount = this.waterCount + 1;
+        this.printMatrix();
+        if (y >= this.maxY) return 'end';
+
+
+        //check next
+        let nextDown = this.matrix[y+1][x];
+
+        if (nextDown == '.') { //free space
+            let downResult = this.goDown(y+1, x);
+            if(downResult == 'blocked'){
+                let leftResult;
+                let nextLeft = this.matrix[y][x - 1];
+                if (nextLeft == '.') { //free space
+                    leftResult = this.goLeft(y, x - 1);
+                } else if (nextLeft == '|') { //water
+                    leftResult = 'otherWater';
+                } else if (nextLeft == '#') {
+                    leftResult = 'blocked';
+                }
+
+                let rightResult;
+                let nextRight = this.matrix[y][x + 1];
+                if (nextRight == '.') { //free space
+                    rightResult = this.goRight(y, x + 1);
+                } else if (nextRight == '|') { //water
+                    rightResult = 'otherWater';
+                } else if (nextRight == '#') {
+                    rightResult = 'blocked';
+                }
+                if (leftResult == 'blocked' && rightResult == 'blocked') {
+                    this.leftFillWater(y, x);
+                    this.rightFillWater(y, x);
+                    this.matrix[y][x] = '~';
+                    this.printMatrix();
+                    return 'blocked';
+                }
+            }
+        } else if (nextDown == '|') { //water
+            return 'otherWater';
+        } else if(nextDown == '#') { //blocked
+            let leftResult;
+            let nextLeft = this.matrix[y][x - 1];
+            if (nextLeft == '.') { //free space
+                leftResult = this.goLeft(y, x-1);
+            } else if (nextLeft == '|') { //water
+                leftResult = 'otherWater';
+            } else if (nextLeft == '#') {
+                leftResult = 'blocked';
+            }
+
+            let rightResult;
+            let nextRight = this.matrix[y][x + 1];
+            if (nextRight == '.') { //free space
+                rightResult = this.goRight(y, x + 1);
+            } else if (nextRight == '|') { //water
+                rightResult = 'otherWater';
+            } else if (nextRight == '#') {
+                rightResult = 'blocked';
+            }
+            if (leftResult == 'blocked' && rightResult == 'blocked'){
+                this.leftFillWater(y,x);
+                this.rightFillWater(y,x);
+                this.matrix[y][x] = '~';
+                this.printMatrix();
+                return 'blocked';
+            }
+
+             /*let leftResult = this.go(y, x - 1);
+            //try right
+            let rightResult = this.go(y, x + 1);
+            //if(leftResult == 'end' && rightResult == 'end') return 'end';
+            if (leftResult == 'blocked' && rightResult == 'blocked') {
+                return 'blocked'
+            } else {
+                return 'ok';
+            } */
+            // return 'blodked';
+        }
+    }
+    leftFillWater(y, x){
+        let xIndex = x - 1;
+        let element = this.matrix[y][xIndex];
+        while (element == '|'){
+            
+            this.matrix[y][xIndex] = '~';
+            xIndex = xIndex - 1;
+            element = this.matrix[y][xIndex];
+            this.printMatrix();
+        }
+    }
+    rightFillWater(y, x){
+        let xIndex = x + 1;
+        let element = this.matrix[y][xIndex];
+        while (element == '|') {
+
+            this.matrix[y][xIndex] = '~';
+            xIndex = xIndex + 1;
+            element = this.matrix[y][xIndex];
+            this.printMatrix();
+        }
+    }
+    goLeft(y,x){
+        this.matrix[y][x] = '|';
+        this.waterCount = this.waterCount + 1;
+        this.printMatrix();
+
+        if (this.matrix[y+1][x] == '.'){
+            let downResult = this.goDown(y+1,x);
+            return downResult;
+        }else{
+            let nextLeft = this.matrix[y][x - 1];
+            //sprawdza po czym idzie i czy może iść w dół, jak nie może to mówi, że dotarł do ściany
+            let leftResult;
+            if (nextLeft == '.') { //free space
+                leftResult = this.goLeft(y, x - 1);
+            } else if (nextLeft == '|') { //water
+                leftResult = 'otherWater';
+            } else if (nextLeft == '#') {
+                leftResult = 'blocked';
+            }
+            return leftResult;
+        }
+
+
+    }
+    goRight(y,x){
+        this.matrix[y][x] = '|';
+        this.waterCount = this.waterCount + 1;
+        this.printMatrix();
+
+        if (this.matrix[y + 1][x] == '.') {
+            let downResult = this.goDown(y + 1, x);
+            return downResult;
+        } else {
+            let nextRight = this.matrix[y][x + 1];
+            //sprawdza po czym idzie i czy może iść w dół, jak nie może to mówi, że dotarł do ściany
+            let rightResult;
+            if (nextRight == '.') { //free space
+                rightResult = this.goRight(y, x + 1);
+            } else if (nextRight == '|') { //water
+                rightResult = 'otherWater';
+            } else if (nextRight == '#') {
+                rightResult = 'blocked';
+            }
+            return rightResult;
+        }
+    }
+
+    go(y, x) {
+        if (y > this.maxY) return 'end';
+        // if (this.matrix[y][x] == '|') return 'water';
+        if (this.matrix[y][x] == '.') {
+            this.matrix[y][x] = '|';
+            this.waterCount = this.waterCount + 1;
+            this.printMatrix();
+            //try down
+            let downResult = this.go(y + 1, x);
+            if (downResult == 'end'){
+                return 'end';
+            }else if (downResult == 'blocked') {
+                //if blocked
+                //try left
+                let leftResult = this.go(y, x - 1);
+                //try right
+                let rightResult = this.go(y, x + 1);
+                //if(leftResult == 'end' && rightResult == 'end') return 'end';
+                if (leftResult == 'blocked' && rightResult == 'blocked') {
+                    return 'blocked'
+                } else {
+                    return 'ok';
+                }
+            } else {
+                return 'ok';
+            }
+        } else {
+            return 'blocked';
+        }
     }
 
     part2() {
@@ -172,12 +345,16 @@ class Day {
     }
 
     printMatrix(){
-        this.matrix
+        this.printCount = (this.printCount + 1) | 0;
+/*         this.matrix
             .filter((el,y) => y>=this.minY && y<=this.maxY)
             .map(row => row
                 .filter((el, x) => x >= this.minX -1 && x <= this.maxX + 1)
                 .join('')
-            ).forEach(row => console.log(row))
+            ).forEach(row => console.log(row)); */
+        if (this.printCount == 15198){
+            this.writeMatrix(this.matrix);
+        }
     }
 
     drawRect(skip) {
@@ -217,8 +394,19 @@ class Day {
         return count;
 
     }
+    writeMatrix(matrix) {
+        const file = path.join(__dirname, 'result.txt');
+        let data = this.matrix
+            .filter((el, y) => y >= this.minY && y <= this.maxY)
+            .map(row => row
+                .filter((el, x) => x >= this.minX - 1 && x <= this.maxX + 1)
+                .join('')
+            ).join('\n');
 
+        fs.writeFileSync(file, data, { encoding: 'utf-8' })
+    }
 };
+
 
 function fileInput(fileName) {
     const file = path.join(__dirname, fileName)
