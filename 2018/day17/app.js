@@ -36,8 +36,8 @@ class Road{
 class Day {
     constructor(dayInput) {
         this.dayInput = dayInput;
-        console.log(this.part1());
-        // console.log(this.part2());
+        // console.log(this.part1());
+        console.log(this.part2());
     }
 
     fillClayDeposit(inputRow){
@@ -97,7 +97,7 @@ class Day {
         let matrix = [];
         for (let i = 0; i <= maxY; i++) {
             matrix[i] = [];
-            for (let j = 0; j <= maxX; j++) {
+            for (let j = 0; j <= maxX+1; j++) {
                 matrix[i][j] = '.';
             }
         }
@@ -106,136 +106,19 @@ class Day {
 
         this.dayInput.forEach((input) => this.fillClayDeposit(input));
 
-        /* 
-        for (let k = 0; k < this.dayInput.length; k++) {
-            let pattern = this.dayInput[k];
-            for (let i = 0; i < pattern.xSize; i++) {
-                for (let j = 0; j < pattern.ySize; j++) {
-                    matrix[pattern.x + i][pattern.y + j]++;
-                }
-            }
-        }
-
-        for (let i = 0; i < maxX; i++) {
-            for (let j = 0; j < maxY; j++) {
-                if (matrix[i][j] > 1) count++;
-            }
-        } */
-        // this.printMatrix();
+        
 
         let start = {y:minY,x:500};
 
         this.waterCount = 0;
     
-        // this.go(start.y, start.x);
-        this.goDown(start.y, start.x);
-        
-        // this.printMatrix();
+        this.go(start.y, start.x, 'down');
+
         this.writeMatrix(this.matrix)
-
-
-        /* let point = start;
-        this.matrix[point.y][point.x] = {type:'water'};
-        this.matrix[point.y][point.x].before = null;
-        let last = this.matrix[point.y][point.x];
-        function go(y,x,last){
-
-        }
-        if(this.matrix[point.y-1][point.x] == '.'){
-            //go down
-        } else if (this.matrix[point.y - 1][point.x].type == 'water') {
-            //blind road
-            //connect with other road
-        } else if (this.matrix[point.y - 1][point.x].type == '#') {
-            //try go left
-            //try go right
-        } */
 
         return this.waterCount;
     }
 
-    goDown(y,x){
-        this.matrix[y][x] = '|';
-        this.waterCount = this.waterCount + 1;
-        this.printMatrix();
-        if (y >= this.maxY) return 'end';
-
-
-        //check next
-        let nextDown = this.matrix[y+1][x];
-
-        if (nextDown == '.') { //free space
-            let downResult = this.goDown(y+1, x);
-            if(downResult == 'blocked'){
-                let leftResult;
-                let nextLeft = this.matrix[y][x - 1];
-                if (nextLeft == '.') { //free space
-                    leftResult = this.goLeft(y, x - 1);
-                } else if (nextLeft == '|') { //water
-                    leftResult = 'otherWater';
-                } else if (nextLeft == '#') {
-                    leftResult = 'blocked';
-                }
-
-                let rightResult;
-                let nextRight = this.matrix[y][x + 1];
-                if (nextRight == '.') { //free space
-                    rightResult = this.goRight(y, x + 1);
-                } else if (nextRight == '|') { //water
-                    rightResult = 'otherWater';
-                } else if (nextRight == '#') {
-                    rightResult = 'blocked';
-                }
-                if (leftResult == 'blocked' && rightResult == 'blocked') {
-                    this.leftFillWater(y, x);
-                    this.rightFillWater(y, x);
-                    this.matrix[y][x] = '~';
-                    this.printMatrix();
-                    return 'blocked';
-                }
-            }
-        } else if (nextDown == '|') { //water
-            return 'otherWater';
-        } else if(nextDown == '#') { //blocked
-            let leftResult;
-            let nextLeft = this.matrix[y][x - 1];
-            if (nextLeft == '.') { //free space
-                leftResult = this.goLeft(y, x-1);
-            } else if (nextLeft == '|') { //water
-                leftResult = 'otherWater';
-            } else if (nextLeft == '#') {
-                leftResult = 'blocked';
-            }
-
-            let rightResult;
-            let nextRight = this.matrix[y][x + 1];
-            if (nextRight == '.') { //free space
-                rightResult = this.goRight(y, x + 1);
-            } else if (nextRight == '|') { //water
-                rightResult = 'otherWater';
-            } else if (nextRight == '#') {
-                rightResult = 'blocked';
-            }
-            if (leftResult == 'blocked' && rightResult == 'blocked'){
-                this.leftFillWater(y,x);
-                this.rightFillWater(y,x);
-                this.matrix[y][x] = '~';
-                this.printMatrix();
-                return 'blocked';
-            }
-
-             /*let leftResult = this.go(y, x - 1);
-            //try right
-            let rightResult = this.go(y, x + 1);
-            //if(leftResult == 'end' && rightResult == 'end') return 'end';
-            if (leftResult == 'blocked' && rightResult == 'blocked') {
-                return 'blocked'
-            } else {
-                return 'ok';
-            } */
-            // return 'blodked';
-        }
-    }
     leftFillWater(y, x){
         let xIndex = x - 1;
         let element = this.matrix[y][xIndex];
@@ -258,78 +141,34 @@ class Day {
             this.printMatrix();
         }
     }
-    goLeft(y,x){
-        this.matrix[y][x] = '|';
-        this.waterCount = this.waterCount + 1;
-        this.printMatrix();
 
-        if (this.matrix[y+1][x] == '.'){
-            let downResult = this.goDown(y+1,x);
-            return downResult;
-        }else{
-            let nextLeft = this.matrix[y][x - 1];
-            //sprawdza po czym idzie i czy może iść w dół, jak nie może to mówi, że dotarł do ściany
-            let leftResult;
-            if (nextLeft == '.') { //free space
-                leftResult = this.goLeft(y, x - 1);
-            } else if (nextLeft == '|') { //water
-                leftResult = 'otherWater';
-            } else if (nextLeft == '#') {
-                leftResult = 'blocked';
-            }
-            return leftResult;
-        }
-
-
-    }
-    goRight(y,x){
-        this.matrix[y][x] = '|';
-        this.waterCount = this.waterCount + 1;
-        this.printMatrix();
-
-        if (this.matrix[y + 1][x] == '.') {
-            let downResult = this.goDown(y + 1, x);
-            return downResult;
-        } else {
-            let nextRight = this.matrix[y][x + 1];
-            //sprawdza po czym idzie i czy może iść w dół, jak nie może to mówi, że dotarł do ściany
-            let rightResult;
-            if (nextRight == '.') { //free space
-                rightResult = this.goRight(y, x + 1);
-            } else if (nextRight == '|') { //water
-                rightResult = 'otherWater';
-            } else if (nextRight == '#') {
-                rightResult = 'blocked';
-            }
-            return rightResult;
-        }
-    }
-
-    go(y, x) {
+    go(y, x, direction) {
         if (y > this.maxY) return 'end';
-        // if (this.matrix[y][x] == '|') return 'water';
+        if (this.matrix[y][x] == '|') return 'end';
         if (this.matrix[y][x] == '.') {
             this.matrix[y][x] = '|';
             this.waterCount = this.waterCount + 1;
             this.printMatrix();
             //try down
-            let downResult = this.go(y + 1, x);
+            let downResult = this.go(y + 1, x, 'down');
             if (downResult == 'end'){
                 return 'end';
-            }else if (downResult == 'blocked') {
+            }else{
                 //if blocked
                 //try left
-                let leftResult = this.go(y, x - 1);
+                let leftResult 
+                if(direction != 'right') leftResult = this.go(y, x - 1, 'left');
                 //try right
-                let rightResult = this.go(y, x + 1);
-                //if(leftResult == 'end' && rightResult == 'end') return 'end';
+                let rightResult 
+                if (direction != 'left') rightResult = this.go(y, x + 1, 'right');
                 if (leftResult == 'blocked' && rightResult == 'blocked') {
-                    return 'blocked'
-                } else {
-                    return 'ok';
+                    this.leftFillWater(y,x);
+                    this.rightFillWater(y,x);
+                    this.matrix[y][x] = '~';
                 }
-            } else {
-                return 'ok';
+                if(leftResult == 'end') return 'end';
+                if(rightResult == 'end') return 'end';
+                return 'blocked'
             }
         } else {
             return 'blocked';
@@ -337,11 +176,14 @@ class Day {
     }
 
     part2() {
-        for (let k = 0; k < this.dayInput.length; k++) {
-            if (this.drawRect(k) == 0) {
-                return this.dayInput[k].id;
+        let r1 = this.part1();
+        let counter = 0;
+        for (let i = 0; i <= this.maxY; i++) {
+            for (let j = 0; j <= this. maxX + 1; j++) {
+                if(this.matrix[i][j] == '~') counter++;
             }
         }
+        return counter;
     }
 
     printMatrix(){
@@ -357,43 +199,6 @@ class Day {
         }
     }
 
-    drawRect(skip) {
-        const maxX = Math.max(...this.dayInput
-            .map((row) => row.x)) + Math.max(...this.dayInput
-                .map((row) => row.xSize));
-
-        const maxY = Math.max(...this.dayInput
-            .map((row) => row.y)) + Math.max(...this.dayInput
-                .map((row) => row.ySize));
-
-        let matrix = [];
-        for (let i = 0; i < maxX; i++) {
-            matrix[i] = [];
-            for (let j = 0; j < maxY; j++) {
-                matrix[i][j] = 0;
-            }
-        }
-
-        for (let k = 0; k < this.dayInput.length; k++) {
-            let pattern = this.dayInput[k];
-            if (k == skip) continue;
-            for (let i = 0; i < pattern.xSize; i++) {
-                for (let j = 0; j < pattern.ySize; j++) {
-                    matrix[pattern.x + i][pattern.y + j]++;
-                }
-            }
-        }
-
-        let pattern = this.dayInput[skip];
-        let count = 0;
-        for (let i = 0; i < pattern.xSize; i++) {
-            for (let j = 0; j < pattern.ySize; j++) {
-                count += matrix[pattern.x + i][pattern.y + j];
-            }
-        }
-        return count;
-
-    }
     writeMatrix(matrix) {
         const file = path.join(__dirname, 'result.txt');
         let data = this.matrix
@@ -418,6 +223,5 @@ function day(file) {
     new Day(fileInput(file));
 }
 
-// day('data2.input');
-//day('data3.input');
+day('data2.input');
 day('data.input');
