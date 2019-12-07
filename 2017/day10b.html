@@ -1,0 +1,94 @@
+<html>
+
+<body>
+	<script>
+		var day10input = "189,1,111,246,254,2,0,120,215,93,255,50,84,15,94,62";
+		var day10inputTest = "1,2,3";
+
+		class Hashes {
+			constructor(
+				inputString,
+				listSize
+			) {
+				this.lengths = this.createLengths(inputString);
+				this.list = new CircularArray(this.createIncrementalList(listSize));
+				this.current = 0;
+				this.hash = null;
+				this.skipSize = 0;
+			}
+
+			createLengths(inputString){
+				return [...inputString].map((str) => str.charCodeAt(0)).concat([17, 31, 73, 47, 23]);
+			}
+
+			createIncrementalList(listSize){
+				let list = [];
+				for(let i=0;i<listSize;i++) list.push(i);
+				return list;
+			}
+
+			calculate(){
+				for(let i=0;i<64;i++) this.calculateOneRound();
+				this.hash = this.splitArray()
+					.map(this.xorFragment)
+					.map((num)=>Number(num).toString(16))
+					.join('');
+			}
+
+			splitArray(){
+				let splitedArray = [];
+				for(let i=0;i<256;i+=16){
+					splitedArray.push(this.list.getFragment(i, 16));
+				}
+				return splitedArray;
+			}
+
+			xorFragment(fragment){
+				return fragment.reduce((xor, current) => xor ^ current, 0);
+			}
+
+			calculateOneRound(){
+				this.lengths.forEach(length => {
+					let fragment = this.list.getFragment(this.current, length);
+					this.list.setFragment(this.current, fragment.reverse());
+					this.current += (length + this.skipSize);
+					this.skipSize++;
+				}, this);
+				this.product = this.list.array[0] * this.list.array[1];
+			}
+
+		}
+
+		class CircularArray{
+			constructor(array){
+				this.array = array;
+			}
+			getFragment(start, length){
+				let fragment = [];
+				let listIterator = 0;
+				for(let i = 0;i<length;i++){
+					listIterator = (i + start) % this.array.length;
+					fragment.push(this.array[listIterator]);
+				}
+				return fragment;
+			}
+			setFragment(start, fragment){
+				let listIterator = 0;
+				for (let i = 0; i < fragment.length; i++) {
+					listIterator = (i + start) % this.array.length;
+					this.array[listIterator] = fragment[i];
+				}
+			}
+		}
+
+		var hashTest = new Hashes(day10inputTest,256);
+		hashTest.calculate();
+		console.log(hashTest.hash);
+		var hash = new Hashes(day10input, 256);
+		hash.calculate();
+		console.log(hash.hash);
+
+	</script>
+</body>
+
+</html>

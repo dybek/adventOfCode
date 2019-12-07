@@ -1,0 +1,142 @@
+<html>
+
+<body>
+	<script>
+		day25inputTest = ``;
+		day25input = ``;
+		class TuringMachine{
+			constructor(steps){
+				this.steps = steps;
+				this.state = 'A';
+				this.currentPosition = 0;
+				this.initBigTable();
+			}
+
+			initBigTable(){
+				this.bigTable = new Array(5000000);
+				this.bigTable.fill(0);
+			}
+			moveLeft(){
+				this.currentPosition--;
+			}
+			moveRight(){
+				this.currentPosition++;
+			}
+			getValueAtIndex(index){
+				return this.bigTable[2500000+index];
+			}
+			setValueAtIndex(index, value) {
+				this.bigTable[2500000 + index] = value;
+			}
+			getValue() {
+				return this.getValueAtIndex(this.currentPosition);
+			}
+			setValue(value) {
+				this.setValueAtIndex(this.currentPosition, value);
+			}
+			setState(newState){
+				this.state = newState;
+			}
+
+			performStep(){
+				switch(this.state){
+					case 'A':
+						if(this.getValue() == 0){
+							this.setValue(1);
+							this.moveRight();
+							this.setState('B');
+						}else if (this.getValue() == 1) {
+							this.setValue(1);
+							this.moveLeft();
+							this.setState('E');
+						}
+						break;
+					case 'B':
+						if (this.getValue() == 0) {
+							this.setValue(1);
+							this.moveRight();
+							this.setState('C');
+						} else if (this.getValue() == 1) {
+							this.setValue(1);
+							this.moveRight();
+							this.setState('F');
+						}
+						break;
+					case 'C':
+						if (this.getValue() == 0) {
+							this.setValue(1);
+							this.moveLeft();
+							this.setState('D');
+						} else if (this.getValue() == 1) {
+							this.setValue(0);
+							this.moveRight();
+							this.setState('B');
+						}
+						break;
+					case 'D':
+						if (this.getValue() == 0) {
+							this.setValue(1);
+							this.moveRight();
+							this.setState('E');
+						} else if (this.getValue() == 1) {
+							this.setValue(0);
+							this.moveLeft();
+							this.setState('C');
+						}
+						break;
+					case 'E':
+						if (this.getValue() == 0) {
+							this.setValue(1);
+							this.moveLeft();
+							this.setState('A');
+						} else if (this.getValue() == 1) {
+							this.setValue(0);
+							this.moveRight();
+							this.setState('D');
+						}
+						break;
+					case 'F':
+						if (this.getValue() == 0) {
+							this.setValue(1);
+							this.moveRight();
+							this.setState('A');
+						} else if (this.getValue() == 1) {
+							this.setValue(1);
+							this.moveRight();
+							this.setState('C');
+						}
+						break;
+				}
+			}
+			performSteps(){
+				this.printCenter();
+				for(let i=0;i<this.steps;i++){
+					this.performStep();
+					// this.printCenter();
+				}
+			}
+
+			checksum(){
+				let sum = 0;
+				for(let i=0;i<this.bigTable.length;i++){
+					sum+=this.bigTable[i];
+				}
+				return sum;
+			}
+			printCenter(){
+				let v = this.getValueAtIndex.bind(this);
+				let t = [v(-3), v(-2), v(-1), v(0), v(1), v(2)];
+				console.log(t);
+			}
+
+			partA(){
+				this.performSteps();
+				console.log(this.checksum());
+			}
+		}
+
+		let turingMachine = new TuringMachine(12523873);
+		turingMachine.partA();
+	</script>
+</body>
+</html>

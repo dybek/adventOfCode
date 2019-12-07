@@ -1,0 +1,141 @@
+<html>
+
+<body>
+	<script>
+
+		let day13inputTest = `0: 3
+1: 2
+4: 4
+6: 4`;
+		let day13input = `0: 3
+1: 2
+2: 5
+4: 4
+6: 6
+8: 4
+10: 8
+12: 8
+14: 6
+16: 8
+18: 6
+20: 6
+22: 8
+24: 12
+26: 12
+28: 8
+30: 12
+32: 12
+34: 8
+36: 10
+38: 9
+40: 12
+42: 10
+44: 12
+46: 14
+48: 14
+50: 12
+52: 14
+56: 12
+58: 12
+60: 14
+62: 14
+64: 12
+66: 14
+68: 14
+70: 14
+74: 24
+76: 14
+80: 18
+82: 14
+84: 14
+90: 14
+94: 17`;
+
+		class Scanners {
+			constructor(
+				firewallConfig
+			) {
+				this.firewall = this.createFirewall(firewallConfig);
+			}
+
+			createFirewall(firewallConfig){
+				let firewall = [];
+				firewallConfig
+					.split('\n')
+					.map(this.extractDepthAndRange.bind(this))
+					.forEach(depthAndRange => firewall[depthAndRange[0]] = new Scanner(depthAndRange[1]));
+				return firewall;
+			}
+
+			extractDepthAndRange(row){
+				let matched = /(\d+):\s+(\d+)/g.exec(row);
+				return [
+					matched[1],
+					matched[2]
+				]
+			}
+
+			calculateSeverity(){
+				let severity = 0;
+				for(let i = 0; i< this.firewall.length; i++){
+					let scanner = this.firewall[i];
+					if(scanner){
+						if(scanner.getPosition(i) == 0){
+							severity += i * scanner.range;
+						}
+					}
+				}
+				return severity;
+			}
+
+			isCaught(delay) {
+				
+
+				for (let i = 0; i < this.firewall.length; i++) {
+					let pico = delay + i;
+					let scanner = this.firewall[i];
+					if (scanner) {
+						if (scanner.getPosition(pico) == 0) {
+							return true;
+						}
+					}
+				}
+				return false;
+			}
+
+			calculateDelay(){
+				let delay = 0;
+				while(this.isCaught(delay)){
+					delay++;
+				}
+				return delay;
+			}
+		}
+
+		class Scanner{
+			constructor(
+				range,
+			){
+				this.range = range
+			}
+
+			getPosition(pico){
+				let halfSize = this.range - 1;
+				let fullRun = 2 * halfSize;
+				let step = pico % fullRun;
+				return step <= halfSize ? step : fullRun - step;
+			}
+		}
+
+		var st = new Scanners(day13inputTest);
+		console.log(st.calculateSeverity());
+		console.log(st.calculateDelay());
+		var s = new Scanners(day13input);
+		console.log(s.calculateSeverity());
+		console.log(s.calculateDelay());
+
+
+	</script>
+</body>
+
+</html>
