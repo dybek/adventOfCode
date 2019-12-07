@@ -1,22 +1,29 @@
-(function jsonGrammarOnlyExample() {
+"use strict"
+const chevrotain = require("chevrotain")
+// const chevrotain = require("./chevrotain.js")
+const Lexer = chevrotain.Lexer
+const createToken = chevrotain.createToken
+
+// (function(exports){
+
     // ----------------- Lexer -----------------
-    const createToken = chevrotain.createToken;
-    const Lexer = chevrotain.Lexer;
+
+
 
     const N = createToken({ name: "N", pattern: /N/ });
     const E = createToken({ name: "E", pattern: /E/ });
     const W = createToken({ name: "W", pattern: /W/ });
     const S = createToken({ name: "S", pattern: /S/ });
 
-    const Pipe = createToken({ name: "Pipe", pattern: /\|/ });
+    const PPipe = createToken({ name: "PPipe", pattern: /\|/ });
 
     const LBracket = createToken({ name: "LBracket", pattern: /\(/ });
     const RBracket = createToken({ name: "RBracket", pattern: /\)/ });
 
     const Begin = createToken({ name: "Begin", pattern: /\^/ });
-    const End = createToken({ name: "End", pattern: /\$/ });
+    const End = createToken({ name: "End", pattern: /\$\n/ });
 
-    const aocTokens = [Begin, End, Pipe, LBracket, RBracket,
+    const aocTokens = [Begin, End, PPipe, LBracket, RBracket,
         N, E, W, S];
 
     const AocLexer = new Lexer(aocTokens, {
@@ -29,7 +36,7 @@
     RBracket.LABEL = "')'";
     Begin.LABEL = "'^'";
     End.LABEL = "'$'";
-    Pipe.LABEL = "'|'";
+    PPipe.LABEL = "'|'";
 
 
     // ----------------- parser -----------------
@@ -38,14 +45,15 @@
     class AocParser extends Parser {
         constructor() {
             super(aocTokens, {
-                recoveryEnabled: true
+                recoveryEnabled: true,
+                outputCst: true
             })
 
             const $ = this;
 
             $.RULE("aoc", () => {
                 $.CONSUME(Begin);
-                $.SUBRULE($.exp)
+                $.SUBRULE($.exp);
                 $.CONSUME(End);
             });
 
@@ -71,7 +79,7 @@
             $.RULE("alt", () => {
                 $.CONSUME(LBracket);
                 $.SUBRULE1($.exp);
-                $.CONSUME(Pipe);
+                $.CONSUME(PPipe);
                 $.SUBRULE2($.exp);
                 $.CONSUME(RBracket);
             });
@@ -85,10 +93,10 @@
 
     }
 
-    // for the playground to work the returned object must contain these fields
-    return {
-        lexer: AocLexer,
-        parser: AocParser,
-        defaultRule: "aoc"
-    };
-}())
+module.exports = {
+    lexer: AocLexer,
+    parser: AocParser
+}
+        // defaultRule: "aoc";
+
+// })(exports);
