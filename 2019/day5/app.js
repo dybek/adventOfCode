@@ -9,10 +9,10 @@ class InputRow {
 }
 
 class Day5 {
-    constructor(dayInput) {
+    constructor(dayInput, input) {
         this.program = dayInput.program;
-        console.log(this.part1(1));
-        // console.log(this.part2(19690720));
+        // console.log(this.part1(1));
+        console.log(this.part2(input));
     }
     size() {
         return this.program.length;
@@ -33,8 +33,8 @@ class Day5 {
                     let firstArgument = this.program[ip++];
                     let secondArgument = this.program[ip++];
                     let thirdArgument = this.program[ip++];
-                    let firstParam = this.readValue(firstArgument % this.size(), instruction.modes[0]);
-                    let secondParam = this.readValue(secondArgument % this.size(), instruction.modes[1]);
+                    let firstParam = this.readValue(firstArgument, instruction.modes[0]);
+                    let secondParam = this.readValue(secondArgument, instruction.modes[1]);
                     let sum = firstParam + secondParam;
                     this.program[thirdArgument % this.size()] = sum;
                     break;
@@ -43,10 +43,11 @@ class Day5 {
                     let firstArgument = this.program[ip++];
                     let secondArgument = this.program[ip++];
                     let thirdArgument = this.program[ip++];
-                    let firstParam = this.readValue(firstArgument % this.size(), instruction.modes[0]);
-                    let secondParam = this.readValue(secondArgument % this.size(), instruction.modes[1]);
+                    let firstParam = this.readValue(firstArgument, instruction.modes[0]);
+                    let secondParam = this.readValue(secondArgument, instruction.modes[1]);
                     let result = firstParam * secondParam;
                     this.program[thirdArgument % this.size()] = result;
+                    break;
                 }
                 case 3:{
                     let argumentIndex = this.program[ip++];
@@ -55,7 +56,51 @@ class Day5 {
                 }
                 case 4:{
                     let argumentIndex = this.program[ip++];
-                    this.output = this.program[argumentIndex];
+                    this.output = this.readValue(argumentIndex, instruction.modes[0]);
+                    break;
+                }
+                case 5:{
+                    let firstArgument = this.program[ip++];
+                    let secondArgument = this.program[ip++];
+                    let firstParam = this.readValue(firstArgument, instruction.modes[0]);
+                    let secondParam = this.readValue(secondArgument, instruction.modes[1]);
+
+                    if (firstParam != 0){
+                        ip = secondParam;
+                    }
+                    break;
+                }
+                case 6:{
+                    let firstArgument = this.program[ip++];
+                    let secondArgument = this.program[ip++];
+                    let firstParam = this.readValue(firstArgument, instruction.modes[0]);
+                    let secondParam = this.readValue(secondArgument, instruction.modes[1]);
+
+                    if (firstParam == 0) {
+                        ip = secondParam;
+                    }
+                    break;
+                }
+                case 7:{
+                    let firstArgument = this.program[ip++];
+                    let secondArgument = this.program[ip++];
+                    let thirdArgument = this.program[ip++];
+                    let firstParam = this.readValue(firstArgument, instruction.modes[0]);
+                    let secondParam = this.readValue(secondArgument, instruction.modes[1]);
+
+                    let result = (firstParam < secondParam) ? 1 : 0;
+                    this.program[thirdArgument % this.size()] = result;
+                    break;
+                }
+                case 8:{
+                    let firstArgument = this.program[ip++];
+                    let secondArgument = this.program[ip++];
+                    let thirdArgument = this.program[ip++];
+                    let firstParam = this.readValue(firstArgument, instruction.modes[0]);
+                    let secondParam = this.readValue(secondArgument, instruction.modes[1]);
+
+                    let result = (firstParam == secondParam) ? 1 : 0;
+                    this.program[thirdArgument % this.size()] = result;
                     break;
                 }
                 case 99:
@@ -70,12 +115,11 @@ class Day5 {
     }
 
     decodeInstruction(code){
-        const stringCode = code.toString();
         const opcode = code % 100;
-        const modes = new Array(3)
-        modes[0] = stringCode.length > 2 ? parseInt(stringCode[2]) : 0;
-        modes[1] = stringCode.length > 3 ? parseInt(stringCode[3]) : 0;
-        modes[2] = stringCode.length > 4 ? parseInt(stringCode[4]) : 0;
+        const modes = new Array(3);
+        modes[0] = Math.floor(code / 100) % 10; //stringCode.length > 2 ? parseInt(stringCode[2]) : 0;
+        modes[1] = Math.floor(code / 1000) % 10; //stringCode.length > 3 ? parseInt(stringCode[3]) : 0;
+        modes[2] = Math.floor(code / 10000) % 10; //stringCode.length > 4 ? parseInt(stringCode[4]) : 0;
         return{
             opcode,
             modes
@@ -84,23 +128,14 @@ class Day5 {
 
     readValue(parameter, parameterMode){
         if(parameterMode === 0){
-            return this.program[parameter];
+            return this.program[parameter % this.size()];
         }else if(parameterMode === 1) { 
             return parameter;
         }
     }
 
-    part2(condition) {
-        const savedProgram = [...this.program];
-        for (let i = 0; i <= 99; i++) {
-            for (let j = 0; j <= 99; j++) {
-                this.program = [...savedProgram];
-                let result = this.part1(i, j);
-                if (result == condition) return 100 * i + j;
-            }
-        }
-
-        return -1;
+    part2(input) {
+        return this.part1(input);
     }
 
 };
@@ -109,9 +144,20 @@ function fileInput(fileName) {
     const file = path.join(__dirname, fileName)
     return new InputRow(fs.readFileSync(file, { encoding: 'utf-8' }));
 }
-function day(file) {
-    new Day5(fileInput(file));
+function day(file, input) {
+    new Day5(fileInput(file), input);
 }
 
 // day('data_test.input');
-day('data.input');
+// day('data_test2.input');
+// day('data_test3.input');
+// day('data_test4.input',0);
+// day('data_test5.input',0);
+// day('data_test6.input',0);
+// day('data_test7.input',0);
+
+// day('data_test8.input',1);
+// day('data_test9.input',1);
+
+// day('data_test10.input',9);
+day('data.input', 5);
