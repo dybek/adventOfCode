@@ -32,7 +32,7 @@ function fileInput(fileName){
         .map(row => new InputRow(row));
 }
 function day(file){
-    new Day1(fileInput(file));
+    new DayX(fileInput(file));
 }
 
 day('data.input');
