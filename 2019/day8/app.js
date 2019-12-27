@@ -8,8 +8,8 @@ class Day8 {
         this.dayInput = dayInput;
         this.width = width;
         this.height = height;
-        console.log(this.part1());
-        // console.log(this.part2());
+        //console.log(this.part1());
+        this.part2();
     }
 
     createLayers() {
@@ -44,7 +44,28 @@ class Day8 {
     }
 
     part2() {
+        const layers = this.createLayers();
 
+        let printableLayers = layers.reduce((prev, current)=>{
+            let result = new Array(prev.length);
+            for(let i=0;i<prev.length;i++){
+                result[i] = prev[i] === '2' ? current[i] : prev[i];
+            }
+            return result.join('');
+        }); //,'0'.repeat(this.width*this.height)
+
+        this.printLayer(printableLayers,this.width, this.height);
+    }
+
+    printLayer(layer, width, height){
+        
+        for(let i=0;i<height;i++){
+            let line = layer.slice(i*width,(i+1)*width);
+            line = line.replace(/2/g,' ')
+                .replace(/1/g,'*')
+                .replace(/0/g,' ');
+            console.log(line);
+        }
     }
 
 };
@@ -60,3 +81,4 @@ function day(file, width, height) {
 
 day('data.input',25, 6);
 // day('data_test.input', 3, 2);
+// day('data_test2.input', 2, 2);
