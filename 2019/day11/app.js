@@ -264,15 +264,31 @@ class Matrix{
             }
         } */
     }
+    printMatrix() {
+        /*  const tempMatrix = [];
+         const firstElement = matrix[0];
+ 
+         for (let y = 0; y < firstElement.length; y++) {
+             tempMatrix[y]=[];
+             for (let x = 0; x < matrix.length; x++) {
+                 tempMatrix[y][x] = matrix[x][y];
+             } 
+ 
+         } */
+        this.matrix.forEach(line => console.log(
+            line.map(el => el == 1 ? '#' : ' ')
+                .join('')
+        ));
+    }
 }
-const size = 4000;
+const size = 30;
 class Day11 {
 
     constructor(dayInput) {
         this.instructionSet = dayInput.program;
     
-        console.log(this.part1());
-        // console.log(this.part2());
+        // console.log(this.part1());
+        this.part2();
     }
 
     createMatrix(){
@@ -312,7 +328,28 @@ class Day11 {
 
 
     part2() {
-        return this.part1(2);
+        let position = { x: size / 2, y: size / 2 };
+        let matrix = this.createMatrix();
+        matrix.set(position, 1);
+        let robot = new Robot(position, up);
+
+        const program = new Program([...this.instructionSet]);
+        let executor = program.execute();
+        let color
+        let turn
+        do {
+            let robotPosition = robot.getPosition();
+            let element = matrix.get(robotPosition);
+            program.input = element;
+            color = executor.next();
+            turn = executor.next();
+            if (color.done && turn.done) break;
+            matrix.set(robotPosition, color.value);
+            robot.turn(turn.value);
+            robot.step();
+
+        } while (true);
+        matrix.printMatrix();
     }
 
 };
