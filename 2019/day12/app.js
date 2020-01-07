@@ -124,11 +124,8 @@ class Day12 {
     }
 
     isEqualArray(one, two) {
-        let result = true;
-        for (let i = 0; i < one.length; i++) {
-            result = result && (one[i] == two[i]);
-        }
-        return result;
+        if (one[0] == two[0] && one[1] == two[1] && one[2] == two[2] && one[3] == two[3] && one[4] == two[4] && one[5] == two[5]) return true;
+        return false;
     }
 
     isEqual(one, two) {
