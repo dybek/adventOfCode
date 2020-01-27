@@ -190,14 +190,48 @@ class MatrixCell{
     //0 - wall
     //1 - path
     //2 - oxygen
-    constructor(value){
+    constructor(value,x,y){
         this.value = value;
+        this.x = x;
+        this.y = y;
         this.visited = false;
         this.deathEnd = false;
         this.comeFrom = null;
+        this.parent = null;
+        this.children = [];
+        this.vertices = [];
     }
     moveAvailable(){
-        return this.value != 0 && this.visited === false;
+        return (this.value == -1 || this.value == 1 || this.value == 2) && (this.visited == false);
+    }
+    addChild(childCell){
+        childCell.parent = this;
+        this.children.push(childCell);
+    }
+    parents(){
+        if(this.parent == null){
+            return [];
+        }else{
+            let parents = [...this.parent.parents()];
+            parents.push(this.parent);
+            return parents;
+        }
+    }
+    connect(other){
+        this.vertices.push(other);
+        other.vertices.push(this);
+    }
+    longestWay(comeFrom){
+        let toSearch = this.vertices.filter(el=>el != comeFrom);
+        if(toSearch.length==0){
+            return 0;
+        }else{
+            return toSearch.map(
+                el=>el.longestWay(this)+1
+            ).reduce(
+                (accu, current)=>current>accu?current:accu
+            )
+        }
     }
 }
 class Matrix{
@@ -212,7 +246,7 @@ class Matrix{
         for (let y = 0; y < size; y++) {
             matrix[y] = [];
             for (let x = 0; x < size; x++) {
-                matrix[y][x] = new MatrixCell(-1);
+                matrix[y][x] = new MatrixCell(-1,x-this.center,y-this.center);
             }
         }
         return matrix;
@@ -242,6 +276,17 @@ class Matrix{
             }
         } */
     }
+    findAny(value){
+        let cell = this.matrix.reduce((acu, currentRow)=>{
+            let cell = currentRow.find(element=>element.value == value);
+            if(cell){
+                return cell;
+            }else{
+                return acu;
+            }
+        },null);
+        return cell;
+    }
     printMatrix() {
         /*  const tempMatrix = [];
          const firstElement = matrix[0];
@@ -254,7 +299,13 @@ class Matrix{
  
          } */
         this.matrix.forEach(line => console.log(
-            line.map(el => el.value == 1 ? '#' : ' ')
+            line.map(el => {
+                    // if(el.visited == true) return 'o';
+                    if(el.value == 0) return '#';
+                    if(el.value == 1) return '.';
+                    if(el.value == 2) return 'O';
+                    return ' ';
+                })
                 .join('')
         ));
     }
@@ -266,7 +317,7 @@ const right = { x: 0, y: 1 };
 const up = { x: -1, y: 0 };
 const down = { x: 1, y: 0 };
 
-function neighborPosition(positon, direction){
+function neighborPosition(position, direction){
     return {x:position.x+direction.x,y:position.y+direction.y};
 }
 function opsiteDirection(direction){
@@ -289,11 +340,15 @@ class Droid {
             right
         ]
     }
-    nextMove(nextMoveCode){
+    nextMove(direction){
+        let nextMoveCode = this.directionToMove(direction);
         this.nextStepDirection = this.moves[nextMoveCode];
     }
     step(){
-        this.position = { x: this.position.x + this.nextStepDirection.x, y: this.position.y + this.nextStepDirection.y};
+        this.position = this.newPosition(this.nextStepDirection);
+    }
+    newPosition(direction){
+        return { x: this.position.x + direction.x, y: this.position.y + direction.y};
     }
     comeFrom(){
         return opsiteDirection(this.nextStepDirection);
@@ -314,26 +369,71 @@ class DroidMover{
         this.executor = program.execute();
     }
 
+    nextDirection(){
+        if(this.canMove(up)) return up;
+        if(this.canMove(down)) return down;
+        if(this.canMove(right)) return right;
+        if(this.canMove(left)) return left;
+        return null;
+    }
+    currentCell(){
+        let currentPosition = this.droid.getPosition();
+        return this.matrix.get(currentPosition);
+    }
+
     move(){
-        let nextMove;
-        nextMove = up;
-        if(this.canMove(nextMove)){
+        let nextMove = this.nextDirection();
+        if(nextMove == null){
+            // move back
+            let currentCell = this.currentCell();
+            currentCell.deathEnd = true;
+            let direction = currentCell.comeFrom;
+            let programResult = this.tryToMove(direction);
+            if(programResult != 1) {
+                // console.log('error');
+                return 'end';
+            }
+            this.droid.nextMove(direction);
+            this.droid.step();
+            return;
+        }
+        // if(this.canMove(nextMove)){
             let programResult = this.tryToMove(nextMove);
+            
             if(programResult == 0){
                 //wall
                 //do not move
+                let newPosition = this.droid.newPosition(nextMove);
                 //set wall on matrix
-
+                let cell = this.matrix.get(newPosition);
+                cell.value = programResult;
+                // cell.visited = true;
+                // nextMove
+                if(this.isDeathEnd()){
+                    cell.deathEnd = true;
+                }
                 //check if it is death end and return one step before
                 //or
                 //change direction and try to move
-
             }else{
                 //path - 1
                 //oxygen - 2
                 //move droid on matrix
+                this.droid.nextMove(nextMove);
+                this.droid.step();
+                if(programResult == 2){
+                    console.log('ok');
+                }
+                let currentCell = this.currentCell();
+                currentCell.comeFrom = this.droid.comeFrom();
+                currentCell.value = programResult;
+                currentCell.visited = true;
+
+                let parentCell = this.matrix.get(this.droid.newPosition(currentCell.comeFrom));
+                parentCell.addChild(currentCell);
+                parentCell.connect(currentCell);
             }
-        }
+        // }
 
     }
     canMove(nextMove){
@@ -352,9 +452,15 @@ class DroidMover{
     //1 - path
     //2 - oxygen
     }
+    isDeathEnd(){
+        return this.canMove(up) ||
+        this.canMove(down) ||
+        this.canMove(left) ||
+        this.canMove(right)
+    }
 }
 
-const size = 90;
+const size = 44;
 class Day15 {
 
     constructor(dayInput) {
@@ -369,14 +475,29 @@ class Day15 {
     part1() {
         let matrix = new Matrix(size);
         const program = new Program([...this.instructionSet]);
-        let executor = program.execute();
+        
         let x = 0
         let y = 0;
         let droid = new Droid({x,y})
-        let nextDirection = 1;
-        let output;
 
-        do{
+
+        let droidMover = new DroidMover(droid, matrix, program);
+
+        let centerCell = droidMover.currentCell();
+        centerCell.value = 1;
+        centerCell.visited = true;
+        centerCell.comeFrom = zero;
+
+        for(let i=0;i<3000;i++){
+            let moveResult = droidMover.move();
+            if(moveResult == 'end') break;
+            // await new Promise(r => setTimeout(r, 100));
+            // console.clear();
+        }
+        matrix.printMatrix();
+        let oxygen = matrix.findAny(2);
+        return oxygen.parents().length;
+        /* do{
             program.input = nextDirection;
             output = executor.next();
             droid.nextStepDirection(nextDirection);
@@ -385,51 +506,34 @@ class Day15 {
             if (output.done) break;
             matrix.set({ x: x.value, y: y.value }, id.value);
 
-        }while(true);
-
-        return matrix.count(2);
+        }while(true); */
+        return matrix.count(1);
     }
 
 
     part2() {
         let matrix = new Matrix(size);
-        let instructions = [...this.instructionSet];
-        instructions[0] = 2;
-        const program = new Program([...instructions]);
-        let executor = program.execute();
-        let x
-        let y
-        let id //3-padle, 4-ball
-        let padleX
-        let ballX
-        let score
-        do {
-            x = executor.next();
-            y = executor.next();
-            id = executor.next();
-            if (x.done && y.done && id.done) break;
-            if(x.value == -1 && y.value ==0){
-                score = id.value;
-            }else{
-                if(id.value == 3){
-                    padleX = x.value
-                }
-                if (id.value == 4) {
-                    ballX = x.value
-                }
-                if(ballX<padleX){
-                    program.input = -1;
-                } else if (ballX > padleX) {
-                    program.input = 1;
-                }else{
-                    program.input = 0;
-                }
-                matrix.set({ x: x.value, y: y.value }, id.value);
-            }
+        const program = new Program([...this.instructionSet]);
+        
+        let x = 0
+        let y = 0;
+        let droid = new Droid({x,y})
 
-        } while (true);
 
-        return score;
+        let droidMover = new DroidMover(droid, matrix, program);
+
+        let centerCell = droidMover.currentCell();
+        centerCell.value = 1;
+        centerCell.visited = true;
+        centerCell.comeFrom = zero;
+
+        for(let i=0;i<3000;i++){
+            let moveResult = droidMover.move();
+            if(moveResult == 'end') break;
+        }
+        matrix.printMatrix();
+        let oxygen = matrix.findAny(2);
+        return oxygen.longestWay(null);
     }
 
 };
