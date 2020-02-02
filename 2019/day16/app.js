@@ -31,10 +31,11 @@ class PatternGenerator{
 }
 
 class Day16 {
-    constructor(dayInput) {
+    constructor(dayInput, times) {
         this.dayInput = dayInput;
-        console.log(this.part1());
-        // console.log(this.part2());
+        this.times = times;
+        // console.log(this.part1());
+        console.log(this.part2());
     }
 
     phrase(input){
@@ -72,8 +73,67 @@ class Day16 {
         return input.substring(0,8);
     }
 
+    part3() {
+        let phrasesCount = 100;
+        let input = this.dayInput.repeat(this.times);
+        let offset = input.substring(0,7);
+        for(let i=0;i<phrasesCount;i++){
+            input = this.phrase(input);
+        }
+        return input.substring(offset,offset+8);
+    }
+
+    position(phrase, index){
+        if(phrase == 0){
+            return this.input[index];
+        }else{
+            if(index == this.inputLastElementIndex){
+                return this.input[this.inputLastElementIndex];
+            }else{
+                return (this.position(phrase, index+1) + this.position(phrase-1, index)) % 10;
+            }
+        }
+    }
+
+    halfPhrase(input){
+        let output = [];
+        output.fill(0);
+        let half = Math.ceil(this.input.length/2);
+        for(let i=this.inputLastElementIndex;i>=half;--i){
+            if(i == this.inputLastElementIndex){
+                output[i] = input[this.inputLastElementIndex];
+            }else{
+                output[i] = (output[i+1] + input[i]) % 10;
+            }
+        }
+        return output;
+    }
+
     part2() {
-  
+
+        //ostatnią przepisuję n-output to n-input
+        //poprzednia (n-1)-output to n-output + (n-1)-input
+
+        let phrasesCount = 100;
+        let input = this.dayInput.repeat(this.times);
+        
+        this.input = Array.from(input).map(s=>parseInt(s));
+        this.inputLastElementIndex = this.input.length -1;
+        let offset = parseInt(input.substring(0,7));
+
+        for(let i=0;i<phrasesCount;i++){
+            this.input = this.halfPhrase(this.input);
+        }
+        let result = this.input.slice(offset,offset+8).join('');
+        // let result = ''+this.input[offset]+this.input[offset+1]+this.input[offset+2];
+        // return input.substring(offset,offset+8);
+
+        // let result = this.position(100,offset);
+        // let result = this.position(3,5);
+        // for(let i=0;i<phrasesCount;i++){
+            // input = this.phrase(input);
+        // }
+        return result;
     }
 
 };
@@ -82,12 +142,14 @@ function fileInput(fileName){
     const file = path.join(__dirname, fileName)
     return fs.readFileSync(file, { encoding: 'utf-8' });
 }
-function day(file){
-    new Day16(fileInput(file));
+function day(file,times){
+    new Day16(fileInput(file), times);
 }
 
-day('data.input');
-// day('data_test.input');
-day('data_test2.input');
-day('data_test3.input');
-day('data_test4.input');
+day('data.input', 10000);
+// day('data_test.input',10);
+// day('data_test2.input');
+// day('data_test3.input');
+// day('data_test4.input');
+// day('data_test5.input',10000);
+// day('data_test.input',1);
