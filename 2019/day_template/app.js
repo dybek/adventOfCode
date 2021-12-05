@@ -11,16 +11,16 @@ class InputRow {
 class DayX {
     constructor(dayInput) {
         this.dayInput = dayInput;
-        console.log(this.part1());
-        console.log(this.part2());
+        console.log("part1:", this.part1());
+        console.log("part2:", this.part2());
     }
 
     part1() {
-        
+
     }
 
     part2() {
-  
+
     }
 
 };
